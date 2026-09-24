@@ -12,10 +12,18 @@ MetriX is a comprehensive compliance engine designed to verify and enforce legal
 *   **Mobile App:** Designed for field officers to easily capture imagery of packages, process them using AI for text/barcode extraction, and instantly check against metrology rules. It also acts as a portal for vigilant consumers to report non-compliant products.
 
 ### Screenshots
-*(Add your screenshots here)*
-*   `Screenshot 1: Web Dashboard showing compliance statistics.`
-*   `Screenshot 2: Mobile App scanning a product barcode.`
-*   `Screenshot 3: AI extraction results and compliance checks.`
+
+**Web App Interface**
+<p align="center">
+  <img src="screenshots/web-00-login.png" width="45%" alt="Web Login" />
+  <img src="screenshots/web-01-dashboard.png" width="45%" alt="Web Dashboard" />
+</p>
+
+**Mobile App Interface**
+<p align="center">
+  <img src="screenshots/mob-00-login.png" width="45%" alt="Mobile Login" />
+  <img src="screenshots/mob-01-today.png" width="45%" alt="Mobile Dashboard" />
+</p>
 
 ---
 
