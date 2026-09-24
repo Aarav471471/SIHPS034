@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "MetriX",
+    "slug": "metrix",
+    "scheme": "metrix",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "in.gov.metrology.metrix",
+      "infoPlist": {
+        "NSCameraUsageDescription": "MetriX photographs the printed panels of a package so its declarations can be checked against the Legal Metrology Rules.",
+        "NSLocationWhenInUseUsageDescription": "MetriX records where an inspection or citizen report was made, so a finding can be tied to the premises it came from.",
+        "NSPhotoLibraryAddUsageDescription": "MetriX can save a captured evidence photograph to your device."
+      }
+    },
+    "android": {
+      "package": "in.gov.metrology.metrix",
+      "adaptiveIcon": {
+        "backgroundColor": "#f9f6f1",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#f9f6f1"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MetriX photographs the printed panels of a package so its declarations can be checked against the Legal Metrology Rules."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "MetriX records where an inspection or citizen report was made, so a finding can be tied to the premises it came from."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

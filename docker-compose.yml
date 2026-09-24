@@ -1,0 +1,162 @@
+# =============================================================================
+#  MetriX -- full production topology from Final Production Architecture v3.0
+#
+#  Brings up the exact stack in the spec: PostgreSQL + MinIO persistence, a
+#  Redis event bus, and the four Celery worker groups consuming their own
+#  queues.  Everything the dev fallbacks stand in for runs for real here.
+#
+#      docker compose up -d
+#      docker compose exec api python -m seed.seed --reset
+#
+#  API   http://localhost:8000/docs      MinIO console  http://localhost:9001
+#  Web   http://localhost:5173           Flower         http://localhost:5555
+# =============================================================================
+
+name: metrix
+
+x-backend-env: &backend-env
+  DATABASE_URL: postgresql+asyncpg://metrix:metrix@postgres:5432/metrix
+  REDIS_URL: redis://redis:6379/0
+  TASK_BACKEND: celery
+  STORAGE_BACKEND: minio
+  MINIO_ENDPOINT: http://minio:9000
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-metrix}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-metrix-secret}
+  MINIO_BUCKET: metrix-evidence
+  SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env before starting}
+  VISION_PROVIDER: ${VISION_PROVIDER:-mock}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  OCR_ENGINE: ${OCR_ENGINE:-auto}
+  PDF_ENGINE: weasyprint
+  ENVIRONMENT: production
+  DEBUG: "false"
+
+x-backend-base: &backend-base
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  environment: *backend-env
+  volumes:
+    - ./backend:/app
+  depends_on:
+    postgres: {condition: service_healthy}
+    redis: {condition: service_healthy}
+    minio: {condition: service_healthy}
+  restart: unless-stopped
+
+services:
+  # ---------------------------------------------------------------- storage --
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: metrix
+      POSTGRES_PASSWORD: metrix
+      POSTGRES_DB: metrix
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metrix -d metrix"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports: ["6379:6379"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-metrix}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-metrix-secret}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # web console
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ api gateway --
+  api:
+    <<: *backend-base
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ----------------------------------------------------------------- workers --
+  # WORKER 1 -- multi-surface AI inspection & grounding engine.
+  # Concurrency 2: each task holds an OpenCV pipeline plus a vision call.
+  worker-inspection:
+    <<: *backend-base
+    command: celery -A app.celery_app.celery_app worker -Q inspection_pipeline -c 2 -n inspection@%h --loglevel=info
+
+  # WORKER 2 -- price-gouging & anomaly radar.
+  worker-radar:
+    <<: *backend-base
+    command: celery -A app.celery_app.celery_app worker -Q anomaly_radar_queue -c 2 -n radar@%h --loglevel=info
+
+  # WORKER 3 -- e-commerce sync & listing cross-check (I/O bound, so higher concurrency).
+  worker-ecom:
+    <<: *backend-base
+    command: celery -A app.celery_app.celery_app worker -Q ecom_crawler_queue -c 4 -n ecom@%h --loglevel=info
+
+  # WORKER 4 -- inter-agency graph, risk routing, PDF rendering and notifications.
+  worker-agency:
+    <<: *backend-base
+    command: >
+      celery -A app.celery_app.celery_app worker
+      -Q cross_agency_sync,pdf_generation_queue,notification_dispatch
+      -c 3 -n agency@%h --loglevel=info
+
+  # Periodic schedule (radar sweeps, e-com crawls, agency sync, expiry alerts).
+  beat:
+    <<: *backend-base
+    command: celery -A app.celery_app.celery_app beat --loglevel=info
+
+  flower:
+    <<: *backend-base
+    command: celery -A app.celery_app.celery_app flower --port=5555
+    ports: ["5555:5555"]
+
+  # --------------------------------------------------------------- frontend --
+  web:
+    build:
+      # Context is the repo root so the build can reach packages/shared, which
+      # the web app imports for its API types.
+      context: .
+      dockerfile: web/Dockerfile
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    ports: ["5173:80"]
+    depends_on: [api]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:

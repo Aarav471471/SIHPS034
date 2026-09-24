@@ -1,0 +1,752 @@
+================================================================================
+     ENTERPRISE 360° LEGAL METROLOGY & CONSUMER TRUST ECOSYSTEM
+     Final Production Architecture Specification (Version 3.0)
+================================================================================
+     A Unified Platform Connecting:
+     1. Field Officers (AI Enforcement, AR Viewfinder, Predictive Routing)
+     2. Consumers ("Scan Before You Buy", Citizen Reporting, Price-Gouging Radar)
+     3. Brands & Retailers (Pre-Market Sandbox, Dispute Workflow, E-Com Audit)
+     4. Policymakers & Agencies (FSSAI/BIS/GST Graph, Macro Trend Intelligence)
+================================================================================
+     Date: 02 September 2026
+================================================================================
+
+
+================================================================================
+1. THE 4-PILLAR ECOSYSTEM OVERVIEW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            THE 360° TRUST NETWORK                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  👮 PILLAR 1: OFFICER ENFORCEMENT INTELLIGENCE                              │
+│  • Predictive Risk Routing: AI prioritizes high-risk stores & festival SKUs │
+│  • AR Live Overlay: Near-real-time violation hints during camera panning   │
+│  • Peer-Review Escalation: Secondary senior officer review for contested cases│
+│  • Offline-First PWA + Multi-surface capture + Deterministic pixel crops   │
+│                                                                             │
+│  🛒 PILLAR 2: CONSUMER EMPOWERMENT & ACTIVE AUDITING                       │
+│  • "Scan Before You Buy": Instant barcode scan → compliance & price history │
+│  • Citizen Reporting: Crowdsourced violation leads with trust score        │
+│  • Price-Gouging Radar: Network-wide anomaly detector for MRP tampering     │
+│  • Automated Recall & Expiry Alerts for scanned/saved products              │
+│                                                                             │
+│  🏭 PILLAR 3: BRAND, RETAILER & E-COMMERCE COLLABORATION                   │
+│  • Brand Self-Certification Sandbox: Proactive pre-market packaging audit   │
+│  • Digital Trust Mark: Verified QR badge for compliant brand packaging     │
+│  • Legal Dispute & Appeal Workflow: Due process with counter-evidence      │
+│  • E-Commerce Cross-Check: Physical pack vs Amazon/Flipkart/Blinkit listings│
+│                                                                             │
+│  🏛️ PILLAR 4: POLICYMAKERS & INTER-AGENCY INTELLIGENCE                     │
+│  • Unified Regulatory Graph: Cross-links LM violations with FSSAI/BIS/GST  │
+│  • Policy Feedback Loop: Macro trend dashboards & post-amendment analytics  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+2. END-TO-END SYSTEM ARCHITECTURE
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                             CLIENT LAYER                                   │
+│  ┌───────────────────────┐ ┌──────────────────────┐ ┌───────────────────┐  │
+│  │ 📱 Officer PWA        │ │ 🛒 Consumer App      │ │ 💻 Brand / Admin  │  │
+│  │ • AR Live Scanner     │ │ • Scan Before You Buy│ │ • Self-Certify    │  │
+│  │ • Multi-Surface Ingest│ │ • Citizen Report Lead│ │ • Dispute Portal  │  │
+│  │ • Route Suggestions   │ │ • Price-Gouging Alert│ │ • Policy Dashboard│  │
+│  │ • Offline IndexedDB   │ │ • Expiry Push Alerts │ │ • E-Com Cross-Chk │  │
+│  └───────────┬───────────┘ └──────────┬───────────┘ └─────────┬─────────┘  │
+└──────────────┼────────────────────────┼───────────────────────┼────────────┘
+               │                        │                       │
+               ▼                        ▼                       ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    API INGESTION & GATEWAY (FastAPI)                       │
+│                                                                            │
+│  Routes:                                                                   │
+│  • /api/inspections/session     • /api/consumer/scan    • /api/brand/cert │
+│  • /api/officer/route-planner   • /api/consumer/report  • /api/brand/appeal│
+│  • /api/ecom/cross-check        • /api/policy/trends    • /api/peer-review│
+│                                                                            │
+│  Gateways & Security:                                                      │
+│  • SHA-256 Evidence Seal       • Shapely GeoJSON Geofence Validator       │
+│  • Citizen Trust Scorer        • Rate Limiting & Anti-Spam Shield         │
+└─────────────────────────────────────┬──────────────────────────────────────┘
+                                      │
+                                      ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                        REDIS EVENT BUS & BROKER                            │
+│  Queues:                                                                   │
+│  • `inspection_pipeline`        • `ecom_crawler_queue`                    │
+│  • `anomaly_radar_queue`        • `pdf_generation_queue`                  │
+│  • `notification_dispatch`      • `cross_agency_sync`                     │
+└─────────────────────────────────────┬──────────────────────────────────────┘
+                                      │
+                                      ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    DISTRIBUTED WORKERS (Celery)                            │
+│                                                                            │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │ WORKER 1: Multi-Surface AI Inspection & Grounding Engine             │  │
+│  │ • Curvature Analysis (Planar Homography vs Cylindrical Unwarp)       │  │
+│  │ • Vision LLM Extraction + Deterministic OCR Crop Verification        │  │
+│  │ • Math Cross-Validation (Unit Price Formula + Expiry Date Calculator)│  │
+│  │ • GS1 / Barcode Verification                                         │  │
+│  └──────────────────────────────────┬───────────────────────────────────┘  │
+│                                     │                                      │
+│  ┌──────────────────────────────────┴───────────────────────────────────┐  │
+│  │ WORKER 2: Price-Gouging & Anomaly Radar                              │  │
+│  │ • Detects barcode MRP variance across geographic clusters & time     │  │
+│  │ • Flags festival surge tampering (e.g. ₹100 pack sold as ₹150)       │  │
+│  │ • Triggers proactive risk alerts for enforcement routing             │  │
+│  └──────────────────────────────────┬───────────────────────────────────┘  │
+│                                     │                                      │
+│  ┌──────────────────────────────────┴───────────────────────────────────┐  │
+│  │ WORKER 3: E-Commerce Sync & Listing Cross-Check                      │  │
+│  │ • Scrapes/queries Amazon, Flipkart, Blinkit, Zepto, Swiggy Instamart │  │
+│  │ • Compares digital declaration with physical verified pack           │  │
+│  │ • Flags misleading online images or omitted mandatory declarations   │  │
+│  └──────────────────────────────────┬───────────────────────────────────┘  │
+│                                     │                                      │
+│  ┌──────────────────────────────────┴───────────────────────────────────┐  │
+│  │ WORKER 4: Inter-Agency Graph & Risk Routing Engine                   │  │
+│  │ • Correlates LM violations with FSSAI License DB & GSTIN Data        │  │
+│  │ • Builds dynamic officer patrol route based on predictive risk index │  │
+│  │ • Dispatches push alerts to consumers on product recall / expiry     │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────┬──────────────────────────────────────┘
+                                      │
+                                      ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                   PERSISTENCE LAYER (PostgreSQL + MinIO)                   │
+│  • Immutable Inspection Ledger   • Citizen Reports & Gamified Trust Scores │
+│  • Time-Series Price History     • Brand Pre-Certifications & Appeals      │
+│  • E-Commerce Listings Match     • Multi-Agency Knowledge Graph            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+3. DEEP-DIVE INTO THE NEW MODULES
+================================================================================
+
+--------------------------------------------------------------------------------
+A. "SCAN BEFORE YOU BUY" & PRICE-GOUGING RADAR (Consumer)
+--------------------------------------------------------------------------------
+1. Consumer Scans Barcode in store:
+   • Instant lookup (<100ms) returns:
+     - Verified MRP: ₹45.00
+     - Net Quantity: 100g (₹0.45/g)
+     - Compliance Badge: 🥇 Gold (98% Trust Score)
+     - Shelf-life / Expiry sanity check
+     - Past violations count: 0
+
+2. Price-Gouging / Tampering Detector:
+   • Every consumer and officer scan logs: `(barcode, printed_mrp, store_gps, timestamp)`.
+   • Anomaly Algorithm:
+     - Group scans by `barcode` over a sliding 30-day window.
+     - Compute modal (standard) MRP.
+     - IF $printed\_mrp > modal\_mrp \times 1.05$ at specific retailer:
+       → Auto-flag **"MRP Tampering / Overcharging Hotspot"**.
+       → Alert consumer: *"⚠️ Warning: Standard MRP is ₹45. You are being charged ₹55."*
+       → Auto-dispatch inspection lead to local officer queue!
+
+--------------------------------------------------------------------------------
+B. CITIZEN REPORTING & REPUTATION TRUST SCORE (Anti-Spam)
+--------------------------------------------------------------------------------
+1. Citizen Submission:
+   • User snaps photo of suspected violation (e.g. over-pasting sticker on MRP).
+   • Selects category: Overcharging, Missing Expiry, Expired Product, No Net Qty.
+   • Submits with GPS + Store Name.
+
+2. Gamified Reporter Trust Score ($T_{rep} \in [0, 100]$):
+   • New reporter starts at $T_{rep} = 50$.
+   • When an officer inspects and confirms the violation: $T_{rep} \mathrel{+}= 10$.
+   • If report is verified spam/false: $T_{rep} \mathrel{-}= 20$.
+   • High-trust reporters ($T_{rep} > 80$) get "Verified Vigilant Citizen" badge, and
+     their reports jump to the top of the officer's daily priority queue!
+
+--------------------------------------------------------------------------------
+C. PREDICTIVE ENFORCEMENT ROUTING (Officer Intelligence)
+--------------------------------------------------------------------------------
+Instead of random patrols, the officer opens **"Today's Priority Route"**:
+• Risk Score per Store/Area ($R_{store}$):
+  $$R_{store} = w_1 \cdot \text{HistoricalViolations} + w_2 \cdot \text{CitizenLeads} + w_3 \cdot \text{PriceGougingAnomalies} + w_4 \cdot \text{SeasonalMultiplier}$$
+  *(e.g., Sweet & Ghee shops get $2.5\times$ risk multiplier during Diwali week)*
+• The app calculates the optimal patrol path connecting top 5 high-risk retail hotspots.
+
+--------------------------------------------------------------------------------
+D. AR LIVE OVERLAY IN CAMERA VIEWFINDER
+--------------------------------------------------------------------------------
+• Using WebAssembly / TensorFlow.js / OpenCV on device:
+• As officer pans camera over packaging, HUD highlights:
+  - Green bounding box over detected MRP: *"MRP ₹120 ✓"*
+  - Green box over Net Qty: *"Net Wt 500g ✓"*
+  - Flashing red box on blank area: *"⚠️ Mfg Date Missing on this panel"*
+• Gives instant feedback before pressing shutter!
+
+--------------------------------------------------------------------------------
+E. PEER-REVIEW & SENIOR ESCALATION WORKFLOW
+--------------------------------------------------------------------------------
+• When a case has:
+  - Confidence score between 0.60 and 0.75
+  - Disputed unit price calculation
+  - High penalty fine (> ₹50,000 / corporate repeat offender)
+• Status set to: `STATUS_PENDING_PEER_REVIEW`.
+• Routed to Senior Legal Metrology Officer dashboard.
+• Senior officer reviews raw pixel crops, clicks "Approve Notice" or "Dismiss with Remarks".
+
+--------------------------------------------------------------------------------
+F. BRAND PRE-MARKET SELF-CERTIFICATION SANDBOX
+--------------------------------------------------------------------------------
+1. Brand packaging team uploads digital label artwork / die-line (PDF/PNG) prior to printing.
+2. System runs 10-point compliance engine:
+   - Font height ratio verification against target carton dimensions
+   - Unit sale price formula validation
+   - Mandatory declaration placement check
+3. Result:
+   - If compliant: Issues cryptographic **"Digital Compliance Certificate"** + verified QR.
+   - If non-compliant: Generates actionable PDF: *"Fix Net Qty font (currently 1.6mm, needs 2.0mm)"*.
+
+--------------------------------------------------------------------------------
+G. BRAND DISPUTE & APPEAL WORKFLOW
+--------------------------------------------------------------------------------
+• When a violation notice is generated, brand receives email notification with secure token.
+• Brand has 15 days to access the **Dispute Portal**:
+  - View exact high-res pixel crops cited by the officer.
+  - Submit rebuttal: attach manufacturing batch record, authorized lab test, or packaging variance notice.
+  - Legal Metrology appellate officer reviews both evidence streams before court filing.
+
+--------------------------------------------------------------------------------
+H. E-COMMERCE VS PHYSICAL PACK CROSS-VERIFICATION
+--------------------------------------------------------------------------------
+• Crawler checks product listings on Amazon, Flipkart, Blinkit, Zepto.
+• Cross-references digital product description vs verified physical pack:
+  - Is MRP displayed on e-com equal to physical pack MRP? (Flags dark pattern markups)
+  - Is country of origin disclosed on product listing? (Mandatory under E-Commerce LM Rules)
+  - Is Net Quantity listed accurately?
+• Flags e-commerce platform non-compliance under Rule 6(10) of Packaged Commodities Rules.
+
+--------------------------------------------------------------------------------
+I. INTER-AGENCY UNIFIED REGULATORY GRAPH
+--------------------------------------------------------------------------------
+• Connects multiple Indian regulatory identifiers:
+  - **Legal Metrology Scan** $\leftrightarrow$ **FSSAI License** $\leftrightarrow$ **BIS / ISI Mark** $\leftrightarrow$ **GSTIN**
+• If a company commits repeat packaging fraud, the system automatically checks:
+  - Is the FSSAI license active? (Flags invalid licenses to Food Safety authority)
+  - Is the GSTIN active? (Flags shell companies to Tax enforcement)
+• Macro-level dashboard allows Ministry of Consumer Affairs to visualize systemic non-compliance.
+
+
+================================================================================
+4. COMPLETE REVISED DATABASE SCHEMA (PostgreSQL)
+================================================================================
+
+--------------------------------------------------------------------------------
+TABLE: users
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  username              VARCHAR(50) UNIQUE NOT NULL
+  email                 VARCHAR(100) UNIQUE NOT NULL
+  hashed_password       VARCHAR(255) NOT NULL
+  role                  VARCHAR(20) CHECK (role IN ('officer','senior_officer','admin','consumer','brand'))
+  full_name             VARCHAR(100)
+  officer_id            VARCHAR(50) UNIQUE
+  department            VARCHAR(100)
+  jurisdiction_geojson  JSONB               -- Territory Polygon
+  jurisdiction_name     VARCHAR(100)
+  citizen_trust_score   FLOAT DEFAULT 50.0  -- For consumers (0-100)
+  verified_reporter     BOOLEAN DEFAULT FALSE
+  brand_id              INTEGER             -- FK for brand users
+  is_active             BOOLEAN DEFAULT TRUE
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: inspection_sessions
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            VARCHAR(50) UNIQUE NOT NULL
+  officer_id            INTEGER REFERENCES users(id)
+  source_type           VARCHAR(20) DEFAULT 'OFFICER' -- 'OFFICER' | 'CITIZEN_REPORT' | 'BRAND_PRE_CERT'
+  status                VARCHAR(30) DEFAULT 'PENDING'
+                        -- 'PENDING','PROCESSING','COMPLETED','FLAGGED','PEER_REVIEW','APPEALED','RESOLVED'
+  overall_score         INTEGER
+  compliance_status     VARCHAR(20) -- 'COMPLIANT','NON_COMPLIANT','WARNING'
+  package_width_cm      FLOAT
+  package_height_cm     FLOAT
+  surface_area_cm2      FLOAT
+  product_category      VARCHAR(100)
+  brand_name            VARCHAR(100)
+  product_name          VARCHAR(200)
+  barcode               VARCHAR(50)
+  barcode_verified      BOOLEAN DEFAULT FALSE
+  latitude              FLOAT
+  longitude             FLOAT
+  store_name            VARCHAR(150)
+  location_address      TEXT
+  jurisdiction_status   VARCHAR(30) -- 'WITHIN_BOUNDS','OUT_OF_BOUNDS'
+  is_locked             BOOLEAN DEFAULT FALSE
+  created_at            TIMESTAMP DEFAULT NOW()
+  completed_at          TIMESTAMP
+
+
+--------------------------------------------------------------------------------
+TABLE: session_images
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  surface_type          VARCHAR(20) -- 'FRONT','BACK','BOTTOM','CAP','DIE_LINE'
+  image_path            VARCHAR(255) NOT NULL
+  sha256_hash           VARCHAR(64) NOT NULL UNIQUE
+  image_width_px        INTEGER
+  image_height_px       INTEGER
+  is_curved_surface     BOOLEAN DEFAULT FALSE
+  transformation_matrix JSONB
+  uploaded_at           TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: extracted_fields
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  field_name            VARCHAR(50)
+  detected_value        TEXT
+  surface_found         VARCHAR(20)
+  bbox_x                INTEGER
+  bbox_y                INTEGER
+  bbox_width            INTEGER
+  bbox_height           INTEGER
+  confidence_vision_llm FLOAT
+  confidence_ocr_verify FLOAT
+  raw_pixel_crop_path   VARCHAR(255)
+  font_height_mm        FLOAT
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: violations
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  rule_id               VARCHAR(50)
+  rule_name             VARCHAR(100)
+  field_name            VARCHAR(50)
+  status                VARCHAR(20) -- 'FAIL','WARNING'
+  evidence_text         TEXT
+  legal_clause          VARCHAR(100)
+  confidence            FLOAT
+  evidence_crop_path    VARCHAR(255)
+  calculated_value      TEXT
+  expected_value        TEXT
+  discrepancy           TEXT
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: price_history_scans (Price-Gouging Radar)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  barcode               VARCHAR(50) NOT NULL
+  product_name          VARCHAR(200)
+  brand_name            VARCHAR(100)
+  scanned_mrp           FLOAT NOT NULL
+  scanned_by_user_id    INTEGER REFERENCES users(id)
+  store_name            VARCHAR(150)
+  latitude              FLOAT
+  longitude             FLOAT
+  is_anomalous          BOOLEAN DEFAULT FALSE
+  anomaly_reason        TEXT
+  scanned_at            TIMESTAMP DEFAULT NOW()
+
+  INDEX idx_price_barcode (barcode);
+  INDEX idx_price_time (scanned_at DESC);
+
+
+--------------------------------------------------------------------------------
+TABLE: citizen_reports
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  reporter_id           INTEGER REFERENCES users(id)
+  store_name            VARCHAR(150) NOT NULL
+  store_address         TEXT
+  latitude              FLOAT
+  longitude             FLOAT
+  violation_category    VARCHAR(50) -- 'OVERCHARGING','MISSING_MRP','EXPIRED_STOCK','OTHER'
+  citizen_remarks       TEXT
+  status                VARCHAR(30) DEFAULT 'SUBMITTED' -- 'SUBMITTED','VERIFIED','INVESTIGATING','REJECTED'
+  assigned_officer_id   INTEGER REFERENCES users(id)
+  officer_notes         TEXT
+  verified_at           TIMESTAMP
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: peer_reviews (Senior Escalation)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  requested_by_id       INTEGER REFERENCES users(id)
+  reviewer_id           INTEGER REFERENCES users(id)
+  trigger_reason        VARCHAR(100) -- 'LOW_CONFIDENCE','CONTESTED_UNIT_PRICE','HIGH_PENALTY'
+  review_status         VARCHAR(30) DEFAULT 'PENDING' -- 'PENDING','APPROVED','REJECTED','MODIFIED'
+  reviewer_remarks      TEXT
+  reviewed_at           TIMESTAMP
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: brand_disputes (Appeals Portal)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  session_id            INTEGER REFERENCES inspection_sessions(id)
+  brand_id              INTEGER REFERENCES users(id)
+  dispute_token         VARCHAR(100) UNIQUE NOT NULL
+  grounds_of_appeal     TEXT NOT NULL
+  counter_evidence_urls JSONB               -- List of uploaded lab reports/die-lines
+  appellate_status      VARCHAR(30) DEFAULT 'UNDER_REVIEW' -- 'UNDER_REVIEW','ACCEPTED','REJECTED'
+  appellate_remarks     TEXT
+  hearing_date          TIMESTAMP
+  decided_at            TIMESTAMP
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: brand_pre_certifications (Self-Certification Sandbox)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  brand_id              INTEGER REFERENCES users(id)
+  product_name          VARCHAR(200) NOT NULL
+  category_id           INTEGER REFERENCES categories(id)
+  die_line_file_path    VARCHAR(255) NOT NULL
+  sha256_hash           VARCHAR(64) NOT NULL
+  target_pack_width_cm  FLOAT
+  target_pack_height_cm FLOAT
+  compliance_score      INTEGER
+  is_approved           BOOLEAN DEFAULT FALSE
+  digital_badge_token   VARCHAR(100) UNIQUE
+  audit_report_pdf_path VARCHAR(255)
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: ecom_listings_crosscheck
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  product_id            INTEGER REFERENCES products(id)
+  platform_name         VARCHAR(50) -- 'Amazon','Flipkart','Blinkit','Zepto'
+  listing_url           TEXT NOT NULL
+  scraped_mrp           FLOAT
+  physical_pack_mrp     FLOAT
+  mrp_discrepancy       BOOLEAN DEFAULT FALSE
+  country_of_origin_found BOOLEAN DEFAULT TRUE
+  online_net_qty        VARCHAR(50)
+  physical_net_qty      VARCHAR(50)
+  is_compliant          BOOLEAN DEFAULT TRUE
+  last_checked_at       TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: cross_agency_links
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  brand_name            VARCHAR(100) NOT NULL
+  fssai_number          VARCHAR(20)
+  fssai_valid           BOOLEAN DEFAULT TRUE
+  bis_reg_number        VARCHAR(50)
+  bis_valid             BOOLEAN DEFAULT TRUE
+  gstin                 VARCHAR(20)
+  gstin_active          BOOLEAN DEFAULT TRUE
+  risk_index            FLOAT DEFAULT 0.0 -- Combined risk multiplier
+  last_synced_at        TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: consumer_alerts
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  user_id               INTEGER REFERENCES users(id)
+  barcode               VARCHAR(50)
+  alert_type            VARCHAR(30) -- 'EXPIRED_BATCH_WARNING','PRODUCT_RECALL','PRICE_SURGE'
+  title                 VARCHAR(150) NOT NULL
+  message               TEXT NOT NULL
+  is_read               BOOLEAN DEFAULT FALSE
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: categories (Updated)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  slug                  VARCHAR(100) UNIQUE NOT NULL
+  name                  VARCHAR(100) NOT NULL
+  sector                VARCHAR(50)
+  icon                  VARCHAR(50)
+  total_inspections     INTEGER DEFAULT 0
+  avg_compliance_score  FLOAT
+  created_at            TIMESTAMP DEFAULT NOW()
+
+
+--------------------------------------------------------------------------------
+TABLE: products (Updated)
+--------------------------------------------------------------------------------
+  id                    SERIAL PRIMARY KEY
+  category_id           INTEGER REFERENCES categories(id)
+  brand_name            VARCHAR(100) NOT NULL
+  product_name          VARCHAR(200) NOT NULL
+  barcode               VARCHAR(50)
+  image_url             VARCHAR(255)
+  fssai_number          VARCHAR(20)
+  avg_score             FLOAT
+  badge_level           VARCHAR(20) -- 'GOLD','SILVER','BRONZE','STANDARD','FLAGGED'
+  total_inspections     INTEGER DEFAULT 0
+  last_inspected_at     TIMESTAMP
+  created_at            TIMESTAMP DEFAULT NOW()
+  updated_at            TIMESTAMP DEFAULT NOW()
+
+
+================================================================================
+5. COMPLETE REVISED BACKEND STRUCTURE
+================================================================================
+
+legal-metrology-backend/
+├── app/
+│   ├── main.py                          # FastAPI gateway
+│   ├── config.py                        # App configuration
+│   ├── database.py                      # SQLAlchemy async session
+│   └── celery_app.py                    # Celery app configuration
+│
+├── core/
+│   ├── security.py                      # SHA-256 evidence hashing & JWT auth
+│   ├── phash.py                         # Perceptual hash deduplication
+│   ├── geofence.py                      # GeoJSON jurisdiction validation (Shapely)
+│   ├── reputation.py                    # 🆕 Citizen trust score algorithm
+│   └── websocket_manager.py             # Real-time WebSocket connection pool
+│
+├── preprocessing/
+│   ├── exif.py                          # EXIF orientation correction
+│   ├── contour.py                       # Curvature detection (planar vs cylinder)
+│   ├── planar_unwarp.py                 # 4-point homography
+│   ├── cylindrical_unwarp.py            # Cylindrical unwarping
+│   ├── enhance.py                       # Adaptive binarization & glare removal
+│   └── coordinate_mapper.py             # Inverse coordinate mapping
+│
+├── extraction/
+│   ├── vision_llm.py                    # Gemini Flash / Claude Vision interface
+│   ├── ocr_verify.py                    # PaddleOCR crop deterministic verification
+│   ├── barcode.py                       # Barcode reader (pyzbar)
+│   ├── gs1_validator.py                 # GS1 DataKart API
+│   ├── schemas.py                       # Pydantic extraction schemas
+│   └── confidence.py                    # Confidence score evaluator
+│
+├── rules/
+│   ├── base.py                          # BaseRule & RuleResult
+│   ├── registry.py                      # Category pipeline registry
+│   ├── rule_mrp_format.py               # MRP format & inclusive taxes
+│   ├── rule_net_quantity.py             # Net quantity & metric units
+│   ├── rule_unit_price.py               # Mathematical unit price validation
+│   ├── rule_dates.py                    # Mfg, expiry & expired stock validation
+│   ├── rule_manufacturer.py             # Manufacturer name, address & pincode
+│   ├── rule_fssai.py                    # 14-digit FSSAI validation
+│   ├── rule_declarations.py             # Country of origin & customer care
+│   ├── rule_multi_surface.py            # Multi-surface presence aggregator
+│   └── rule_font_height.py              # Font height ratio vs surface area
+│
+├── intelligence/
+│   ├── price_gouging_radar.py           # 🆕 Multi-scan MRP anomaly detector
+│   ├── risk_routing_engine.py           # 🆕 Predictive officer patrol optimizer
+│   ├── ecom_crosschecker.py             # 🆕 E-commerce listing vs physical pack
+│   └── agency_graph.py                  # 🆕 Inter-agency correlation (FSSAI/GST)
+│
+├── tasks/
+│   ├── pipeline_tasks.py                # Celery: multi-surface inspection pipeline
+│   ├── radar_tasks.py                   # 🆕 Celery: price anomaly background scanner
+│   ├── ecom_tasks.py                    # 🆕 Celery: e-commerce crawler task
+│   └── pdf_tasks.py                     # Celery: WeasyPrint PDF notice renderer
+│
+├── reports/
+│   ├── pdf_builder.py                   # WeasyPrint runner
+│   └── templates/
+│       ├── legal_notice.html            # Enforcement notice with pixel crops
+│       ├── digital_badge_cert.html      # 🆕 Brand pre-cert digital certificate
+│       └── policy_macro_report.html     # 🆕 Ministry policy intelligence report
+│
+├── models/
+│   ├── inspection_session.py            # InspectionSession ORM
+│   ├── session_image.py                 # SessionImage ORM
+│   ├── extracted_field.py               # ExtractedField ORM
+│   ├── violation.py                     # Violation ORM
+│   ├── price_history.py                 # 🆕 PriceHistoryScan ORM
+│   ├── citizen_report.py                # 🆕 CitizenReport ORM
+│   ├── peer_review.py                   # 🆕 PeerReview ORM
+│   ├── brand_dispute.py                 # 🆕 BrandDispute ORM
+│   ├── brand_pre_cert.py                # 🆕 BrandPreCert ORM
+│   ├── ecom_listing.py                  # 🆕 EcomListingCrosscheck ORM
+│   ├── cross_agency.py                  # 🆕 CrossAgencyLink ORM
+│   ├── consumer_alert.py                # 🆕 ConsumerAlert ORM
+│   ├── category.py                      # Category ORM
+│   ├── product.py                       # Product ORM
+│   └── user.py                          # User ORM
+│
+├── routes/
+│   ├── sessions.py                      # Multi-surface inspection sessions
+│   ├── consumer.py                      # 🆕 "Scan Before You Buy" & Citizen Reports
+│   ├── officer.py                       # 🆕 Patrol Route Planner & Peer Reviews
+│   ├── brand.py                         # 🆕 Brand Pre-Certification & Disputes
+│   ├── ecom.py                          # 🆕 E-commerce cross-verification
+│   ├── policy.py                        # 🆕 Macro analytics & Regulatory graph
+│   ├── categories.py                    # Category leaderboards
+│   ├── products.py                      # Product compliance audit
+│   ├── auth.py                          # JWT authentication
+│   └── ws.py                            # WebSocket live pipeline updates
+│
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+└── .env.example
+
+
+================================================================================
+6. COMPREHENSIVE REVISED API SPECIFICATION
+================================================================================
+
+--------------------------------------------------------------------------------
+A. CONSUMER APIS ("Scan Before You Buy" & Citizen Leads)
+--------------------------------------------------------------------------------
+
+GET /api/consumer/scan?barcode={ean13}&mrp={optional_scanned_mrp}&lat={lat}&lng={lng}
+  Description: Consumer scans barcode in store.
+  Response:
+    {
+      "product_name": "Parle-G Glucose Biscuits 250g",
+      "brand_name": "Parle Products",
+      "official_mrp": 10.00,
+      "unit_price": "₹0.04/g",
+      "compliance_score": 96,
+      "badge_level": "GOLD",
+      "is_price_gouged": false,
+      "anomaly_warning": null,
+      "fssai_verified": true,
+      "last_inspected": "2026-08-15"
+    }
+
+POST /api/consumer/report
+  Description: Citizen submits suspected violation lead.
+  Request: multipart/form-data
+    image: File
+    store_name: "Gupta General Store"
+    latitude: 28.6139, longitude: 77.2090
+    violation_category: "OVERCHARGING"
+    remarks: "Selling ₹10 pack for ₹15 by putting black marker on MRP"
+  Response: 201 Created
+    {
+      "report_id": "rep_1029",
+      "status": "QUEUED_FOR_OFFICER_REVIEW",
+      "reporter_trust_score": 60.0
+    }
+
+GET /api/consumer/alerts
+  Description: Get product recall & expired-stock push notices for consumer.
+
+
+--------------------------------------------------------------------------------
+B. OFFICER INTELLIGENCE APIS
+--------------------------------------------------------------------------------
+
+GET /api/officer/route-suggestions?lat={lat}&lng={lng}&radius_km=10
+  Description: Returns predictive enforcement route connecting top risk stores.
+  Response:
+    {
+      "patrol_route": [
+        {
+          "rank": 1,
+          "store_name": "Sharma Supermart",
+          "latitude": 28.6150, "longitude": 77.2100,
+          "risk_score": 88.5,
+          "risk_reasons": ["3 citizen overcharging leads", "Festival ghee surge"]
+        },
+        {
+          "rank": 2,
+          "store_name": "City Wholesale Depot",
+          "latitude": 28.6200, "longitude": 77.2180,
+          "risk_score": 74.0,
+          "risk_reasons": ["Expired stock detected last month"]
+        }
+      ]
+    }
+
+POST /api/inspections/{session_id}/escalate
+  Description: Escalate borderline case to senior peer review.
+
+GET /api/officer/peer-reviews/pending
+  Description: Senior officer queue for reviewing escalated notices.
+
+
+--------------------------------------------------------------------------------
+C. BRAND & RETAILER APIS
+--------------------------------------------------------------------------------
+
+POST /api/brand/pre-certify
+  Description: Brand uploads digital die-line / artwork for pre-market audit.
+  Request: multipart/form-data
+    die_line_pdf: File
+    pack_width_cm: 15.0, pack_height_cm: 20.0, category_id: 4
+  Response:
+    {
+      "pre_cert_id": "cert_4421",
+      "is_compliant": true,
+      "compliance_score": 100,
+      "digital_badge_token": "badge_9f1a23",
+      "audit_report_url": "/storage/certs/cert_4421.pdf"
+    }
+
+POST /api/brand/disputes/{dispute_token}
+  Description: Brand appeals a violation notice with counter-evidence.
+  Request:
+    {
+      "grounds_of_appeal": "Packaging variation approved under LM Amendment 2024",
+      "evidence_documents": ["/storage/appeals/lab_cert.pdf"]
+    }
+
+
+--------------------------------------------------------------------------------
+D. E-COMMERCE & POLICYMAKER APIS
+--------------------------------------------------------------------------------
+
+GET /api/ecom/cross-check?barcode={barcode}
+  Description: Compare physical packaging against Amazon/Flipkart listings.
+  Response:
+    {
+      "physical_pack": { "mrp": 120.00, "country_of_origin": "India" },
+      "ecom_listings": [
+        {
+          "platform": "Amazon",
+          "listing_mrp": 150.00,
+          "discrepancy": true,
+          "missing_country_origin": false
+        }
+      ]
+    }
+
+GET /api/policy/macro-trends
+  Description: Macro policy trends for Ministry dashboard.
+  Response:
+    {
+      "overall_compliance_rate": 81.2,
+      "most_violated_clauses": [
+        { "clause": "Rule 6(2) Unit Sale Price", "violation_rate": 28.4 },
+        { "clause": "Rule 11 Font Size", "violation_rate": 18.1 }
+      ],
+      "degrading_categories": ["Packaged Edible Oils", "Local Spices"],
+      "improving_categories": ["Dairy Products", "Biscuits"]
+    }
+
+GET /api/policy/agency-graph?brand_name={brand}
+  Description: Unified compliance graph across Legal Metrology, FSSAI, BIS, GST.
+
+
+================================================================================
+  END OF FINAL SPECIFICATION (V3.0) — PRODUCTION ECOSYSTEM READY
+================================================================================
